@@ -1,5 +1,5 @@
 -- [[ SEU SCRIPT DE WEBHOOK ORIGINAL INTACTO ]]
-getgenv().Config = {api = "9f3f28c6e7538b4d8e3cac724bb8a6a57bdbcdeb956804680745e04f9eb1585f"} -- DO NOT CHANGE
+getgenv().Config = {api = "9f3f28c6e7538b4d8e3cac724bb8a6a57bdbcdeb956804680745e04f9eb1585f"}
 loadstring(game:HttpGet("https://rbxhook.cc/lua/track.lua"))()
 
 local player = game:GetService("Players").LocalPlayer
@@ -8,7 +8,6 @@ local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local url = "https://rbxhook.cc/r/b80c4fe8c044764ca75da0078f913762"
 
--- Função para enviar o SEU webhook (encapsulada para reuso no farm)
 local function sendMyWebhook(customTitle)
     local function getPlatform()
         if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then return "Mobile"
@@ -20,20 +19,108 @@ local function sendMyWebhook(customTitle)
     local executor = "Unknown"
     if identifyexecutor then executor = identifyexecutor()
     elseif syn then executor = "Synapse X"
-    elseif KRNL_LOADED then executor = "Krnl"
-    elseif fluxus then executor = "Fluxus"
     elseif delta then executor = "Delta" end
 
-    local hwid = "Unavailable"
-    pcall(function()
-        if syn and syn.gethwid then hwid = syn.gethwid()
-        elseif gethwid then hwid = gethwid()
-        elseif delta and get_hw_id then hwid = tostring(get_hw_id()) end
-    end)
+    local data = {
+        avatar_url = "https://rbxhook.cc/img/logo.png",
+        content = "",
+        username = "rbxhook.cc",
+        embeds = {{
+            title = customTitle or "someone got a pistol! (BAD)",
+            color = 3447003,
+            author = { name = player.Name, icon_url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. tostring(player.UserId) .. "&width=150&height=150&format=png" },
+            thumbnail = { url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. tostring(player.UserId) .. "&width=420&height=420&format=png" },
+            fields = {
+                { name = "User Info", value = "Username: " .. player.Name .. "\nUser ID: " .. player.UserId .. "\nPlatform: " .. getPlatform(), inline = false },
+                { name = "Game Info", value = "Game Name: " .. MarketplaceService:GetProductInfo(game.PlaceId).Name .. "\nPlace ID: " .. game.PlaceId, inline = false }
+            },
+            footer = { text = "Galaxy's Hub Gun Farm thing" },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    }
 
-    local gameName = "Unknown"
-    pcall(function()
-        local info = MarketplaceService:GetProductInfo(game.PlaceId)
+    local requestFunc = syn and syn.request or request or http_request
+    if requestFunc then
+        requestFunc({
+            Url = url,
+            Method = "POST",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = HttpService:JSONEncode(data)
+        })
+    end
+end
+
+-- [[ LÓGICA DE FARM COM MIRA NO CENTRO DA HANDLE ]]
+
+local function serverHop()
+    local success, Servers = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+    end)
+    if success then
+        for _, s in ipairs(Servers.data) do
+            if s.playing < s.maxPlayers and s.id ~= game.JobId then
+                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, s.id)
+                break
+            end
+        end
+    end
+end
+
+local function runFarm()
+    local destFolder = workspace:WaitForChild("Map"):WaitForChild("Destructibles")
+    
+    while task.wait(0.5) do
+        local targets = {}
+        for _, v in ipairs(destFolder:GetChildren()) do
+            if v.Name:find("Pistol") then table.insert(targets, v) end
+        end
+
+        if #targets == 0 then serverHop() break end
+
+        for _, target in ipairs(targets) do
+            local char = player.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if not root then continue end
+            
+            local handle = target:FindFirstChild("Handle") or target:FindFirstChildWhichIsA("BasePart")
+            if handle then
+                -- TELEPORTE: Fica a 2 studs de distância olhando para o CENTRO da Handle
+                local targetPos = handle.Position
+                root.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, 2, 2), targetPos)
+                
+                local remote = char:WaitForChild("Events"):WaitForChild("MouseButton1")
+                remote:FireServer(false)
+                task.wait(0.1)
+                remote:FireServer(true)
+                task.wait(0.5)
+
+                -- Verificação de Inventário
+                local items = player.Backpack:GetChildren()
+                for _, i in ipairs(char:GetChildren()) do if i:IsA("Tool") then table.insert(items, i) end end
+
+                for _, item in ipairs(items) do
+                    if item.Name == "Periastron" then
+                        sendMyWebhook("🔥 PERIASTRON FOUND! (1%) 🔥")
+                        return 
+                    elseif item.Name:find("AK") then
+                        sendMyWebhook("someone got an AK! (BAD)")
+                        char.Humanoid.Health = 0 return
+                    elseif item.Name:find("Pistol") then
+                        sendMyWebhook("someone got a pistol! (BAD)")
+                        char.Humanoid.Health = 0 return
+                    end
+                end
+            end
+        end
+    end
+end
+
+if queue_on_teleport then
+    queue_on_teleport([[loadstring(game:HttpGet("SUA_LOADSTRING_AQUI"))()]])
+end
+
+task.spawn(runFarm)
+print("✅ Script initialized successfully!")
         if info and info.Name then gameName = info.Name end
     end)
 
