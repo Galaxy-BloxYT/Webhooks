@@ -87,13 +87,13 @@ local function runFarm()
                             for _, item in ipairs(items) do
                                 if item.Name == "Periastron" then
                                     remote:FireServer(false)
-                                    sendMyWebhook("PERIASTRON! (1% btw)")
+                                    sendMyWebhook(" YOO SOMEONE GOT A PERIASTRON! (1% btw)")
                                     return -- Encerra o script (objetivo alcançado)
                                 elseif (item.Name:lower():find("ak") or item.Name:lower():find("pistol")) and not alreadyNotified then
                                     alreadyNotified = true -- Bloqueia novos envios
                                     remote:FireServer(false)
                                     
-                                    sendMyWebhook( someone got a item.Name .. " (bad)")
+                                    sendMyWebhook("someone got a " .. item.Name .. " (bad)")
                                     
                                     local dropEvent = item:FindFirstChild("DropEvent")
                                     if dropEvent then
