@@ -115,7 +115,7 @@ end
 
 local qot = queue_on_teleport or (syn and syn.queue_on_teleport)
 if qot then
-    qot([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Galaxy-BloxYT/Webhooks/main/Webhook%20%7C%20notice"))()]])
+    qot([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Galaxy-BloxYT/Webhooks/refs/heads/main/Webhook%20%7C%20notice"))()]])
 end
 
 task.spawn(runFarm)
