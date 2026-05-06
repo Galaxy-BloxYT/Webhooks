@@ -75,6 +75,93 @@ local function runFarm()
                     if remote then
                         remote:FireServer(true)
                         
+                        local alreadyNotified = false 
+                        
+                        for i = 1, 15 do
+                            if alreadyNotified then break end 
+                            task.wait(0.2)
+                            
+                            local items = player.Backpack:GetChildren()
+                            for _, t in ipairs(char:GetChildren()) do if t:IsA("Tool") then table.insert(items, t) end end
+
+                            for _, item in ipairs(items) do
+                                if item.Name == "Periastron" then
+                                    remote:FireServer(false)
+                                    sendMyWebhook("PERIASTRON! (1% btw)")
+                                    return 
+                                elseif (item.Name:lower():find("ak") or item.Name:lower():find("pistol")) and not alreadyNotified then
+                                    alreadyNotified = true 
+                                    remote:FireServer(false)
+                                    
+                                    -- CORREÇÃO DA SINTAXE AQUI:
+                                    sendMyWebhook("someone got a " .. item.Name .. " (bad)")[span_2](start_span)[span_2](end_span)
+                                    
+                                    local dropEvent = item:FindFirstChild("DropEvent")
+                                    if dropEvent then
+                                        dropEvent:FireServer(Instance.new("RemoteEvent", nil))
+                                    end
+                                    
+                                    task.wait(0.5) 
+                                    break 
+                                end
+                            end
+                        end
+                        remote:FireServer(false)
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- Re-execução com link RAW limpo
+local qot = queue_on_teleport or (syn and syn.queue_on_teleport)
+if qot then
+    qot([[loadstring(game:HttpGet("https://raw.githubusercontent.com/Galaxy-BloxYT/Webhooks/main/Webhook%20%7C%20notice"))()]])
+end
+
+task.spawn(runFarm)
+    local success, Servers = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+    end)
+    if success then
+        for _, s in ipairs(Servers.data) do
+            if s.playing < s.maxPlayers and s.id ~= game.JobId then
+                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, s.id)
+                break
+            end
+        end
+    end
+end
+
+local function runFarm()
+    local destFolder = workspace:WaitForChild("Destructibles", 10)
+    if not destFolder then return end
+
+    while task.wait(1) do
+        local targets = {}
+        for _, v in ipairs(destFolder:GetChildren()) do
+            if v.Name == "Pistol" and v:IsA("Model") then table.insert(targets, v) end
+        end
+
+        if #targets == 0 then serverHop() break end
+
+        for _, model in ipairs(targets) do
+            local char = player.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if root then
+                local mesh = model:FindFirstChild("Pistol")
+                if mesh then
+                    root.CFrame = CFrame.lookAt(mesh.Position + Vector3.new(0, 2, 2), mesh.Position)
+                    
+                    task.wait(0.5)
+                    
+                    local events = char:WaitForChild("Events", 5)
+                    local remote = events and events:WaitForChild("MouseButton1", 5)
+                    
+                    if remote then
+                        remote:FireServer(true)
+                        
                         local alreadyNotified = false -- Trava para evitar spam
                         
                         for i = 1, 15 do
