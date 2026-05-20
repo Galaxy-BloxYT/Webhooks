@@ -69,17 +69,14 @@ local function runFarm()
                 
                 task.wait(0.5)
                 
-                -- VERIFICAÇÃO DE SEGURANÇA (FIX DA LINHA 97)
                 local events = char and char:FindFirstChild("Events")
                 local remote = events and events:FindFirstChild("MouseButton1")
                 
                 if remote then
-                    -- pcall protege contra o "nil with nil" se o remote sumir no meio do disparo
                     pcall(function() remote:FireServer(true) end)
                     
-                    local alreadyNotified = false 
                     for i = 1, 15 do
-                        if alreadyNotified or not player.Character then break end 
+                        if not player.Character then break end 
                         task.wait(0.2)
                         
                         local items = player.Backpack:GetChildren()
@@ -88,28 +85,14 @@ local function runFarm()
                         end
 
                         for _, item in ipairs(items) do
+                            -- SÓ FOCO NA PERIASTRON
                             if item.Name == "Periastron" then
                                 pcall(function() remote:FireServer(false) end)
                                 sendMyWebhook("PERIASTRON! (1% btw)")
-                                return 
-                            elseif (item.Name:lower():find("ak") or item.Name:lower():find("pistol")) and not alreadyNotified then
-                                alreadyNotified = true 
-                                pcall(function() remote:FireServer(false) end)
-                                
-                                sendMyWebhook("someone got a " .. item.Name .. " (bad)")
-                                
-                                local dropEvent = item:FindFirstChild("DropEvent")
-                                if dropEvent then
-                                    -- Argumento conforme seu RSpy
-                                    dropEvent:FireServer(Instance.new("RemoteEvent", nil))
-                                end
-                                
-                                task.wait(0.5) 
-                                break 
+                                return -- Para o script completamente porque atingiu o objetivo
                             end
                         end
                     end
-                    -- Desliga o clique com segurança
                     if remote then pcall(function() remote:FireServer(false) end) end
                 end
             end
