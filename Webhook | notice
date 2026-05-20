@@ -88,7 +88,7 @@ local function runFarm()
                             -- SÓ FOCO NA PERIASTRON
                             if item.Name == "Periastron" then
                                 pcall(function() remote:FireServer(false) end)
-                                sendMyWebhook("PERIASTRON! (1% btw)")
+                                sendMyWebhook("PERIASTRON!🔥 (1% btw)")
                                 return -- Para o script completamente porque atingiu o objetivo
                             end
                         end
