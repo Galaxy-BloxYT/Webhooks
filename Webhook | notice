@@ -15,7 +15,7 @@ local function sendMyWebhook(customTitle)
         username = "Galaxy's Hub | Gun Farm",
         avatar_url = discord_pfp,
         embeds = {{
-            title = customTitle or "Item Found!",
+            title = customTitle or "PERIASTRON!!",
             color = 3447003,
             thumbnail = { url = discord_pfp },
             fields = {
