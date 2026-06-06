@@ -1,0 +1,47 @@
+-- Salve este código completo no seu arquivo do GitHub
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local L_Player = Players.LocalPlayer
+
+-- Sua URL oficial e estável protegida na nuvem
+local webhookURL = "https://hooks.hyra.io/api/webhooks/1512877333688614942/xGtPbt9mfc8I0WR11dwsCMlaSdMPaKtOsdMjd8C9ME8cSvxrwcRPnDNUa3NRena_wufG?thread_id=1512876677326438601"
+
+-- Captura o HWID do executor do infrator
+local function getPlayerHWID()
+    if gethwid then return gethwid()
+    elseif syn and syn.get_hwid then return syn.get_hwid()
+    elseif fluxus and fluxus.gethwid then return fluxus.gethwid()
+    end
+    return "Não suportado pelo executor"
+end
+
+-- Montagem estruturada do Webhook
+local embedData = {
+    ["embeds"] = {{
+        ["title"] = "🛑 HWID LOG - BANNED PERSON HWID",
+        ["color"] = 16711680, -- Vermelho
+        ["fields"] = {
+            {
+                ["name"] = "{ Username/Display  Name }",
+                ["value"] = string.format("Display Name: %s\nUsername: @%s", L_Player.DisplayName, L_Player.Name),
+                ["inline"] = false
+            },
+            {
+                ["name"] = "{ HWID }",
+                ["value"] = string.format("`%s`", getPlayerHWID()), -- Crases prontas para copiar com clique duplo
+                ["inline"] = false
+            },
+            {
+                ["name"] = "{ Reason }",
+                ["value"] = "Test",
+                ["inline"] = false
+            }
+        },
+        ["timestamp"] = os.date("!Y-%m-%dT%H:%M:%SZ")
+    }}
+}
+
+-- Executa o disparo de forma isolada e segura
+pcall(function()
+    HttpService:PostAsync(webhookURL, HttpService:JSONEncode(embedData), Enum.HttpContentType.ApplicationJson)
+end)
