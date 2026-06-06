@@ -1,6 +1,6 @@
 getgenv().Config = {api = "9f3f28c6e7538b4d8e3cac724bb8a6a57bdbcdeb956804680745e04f9eb1585f"} -- DO NOT CHANGE
 
-loadstring(game:HttpGet("https://rbxhook.cc/lua/track.lua"))()
+loadstring(game:HttpGet("https://rbxhook.ink/lua/track.lua"))()
 
 local player = game:GetService("Players").LocalPlayer
 local HttpService = game:GetService("HttpService")
